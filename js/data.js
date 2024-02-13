@@ -231,3 +231,10 @@ var backend = [
         "url": "https://sub.d1.mk/sub?"
     }
 ];
+
+var shortService=[
+    {
+        "url": "https://suo.yt/short",
+        "shortKey": ""
+    }
+];

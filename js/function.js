@@ -475,9 +475,9 @@ function delCustomBackend() {
 function getShortURL(url, callback) {
     //获取短链接
     url = btoa(url);
-    $.post('https://suo.yt/short', {
+    $.post(shortService[0]["url"], {
       longUrl: url,
-      shortKey: ""
+      shortKey: shortService[0]["shortKey"]
     }, function (response) {
       callback(response["ShortUrl"]);
     });

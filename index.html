@@ -533,7 +533,7 @@
                     printAlert("danger","请先生成短链接");
                     return;
                 }
-                copyLink("#shortSub");
+                copyLink($("#shortSub").val());
                 printAlert("info","短链接已复制！");
             });
         });
