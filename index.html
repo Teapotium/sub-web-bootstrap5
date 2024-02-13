@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>在线订阅转换</title>
+    <script src="./js/jquery-3.7.1.min.js"></script>
+    <script src="./js/bootstrap.bundle.min.js"></script>
+    <script src="./js/data.js"></script>
+    <script src="./js/function.js"></script>
+    <link rel="stylesheet" href="./css/bootstrap.min.css">
+    <link rel="stylesheet" href="./css/bootstrap-icons.min.css">
+    <style>
+        optgroup{
+            padding-left: 20px;
+            font-style: normal;
+            font-size: 12px;
+            font-weight: lighter;
+        }
+        .icon-link > .bi{
+            height: initial;
+        }
+        option{
+            font-size: initial;
+        }
+        span {
+            user-select: none;
+        }
+        label{
+            user-select: none;
+        }
+        p{
+            user-select: none;
+        }
+        .input-group span{
+            width: 90px;
+        }
+        #adv span{
+            width: 95px;
+        }
+        #sublink{
+            height: 180px;
+        }
+        #alert{
+            position: fixed;
+            top: 0;
+            right: 0;
+            padding: 20px 20px 0px 0px;
+            z-index: 99;
+        }
+    </style>
+</head>
+<body>
+    <div id="alert"></div>
+    <div class="card container my-md-3 shadow-lg">
+        <div class="container my-3 card-body">
+            <div class="mb-4">
+                <p class="display-6">在线订阅转换</p>
+                <div class="btn-group" role="group">
+                    <button type="button" class="btn btn-outline-primary btn-sm" id="themeAuto"><i class="bi bi-cloud-sun-fill"></i></button>
+                    <button type="button" class="btn btn-outline-primary btn-sm" id="themeLight"><i class="bi bi-brightness-high-fill"></i></button>
+                    <button type="button" class="btn btn-outline-primary btn-sm" id="themeDark"><i class="bi bi-moon-fill"></i></button>
+                </div>
+                <div class="d-flex flex-row-reverse">
+                    <a class="icon-link" href="https://github.com/teapotium/sub-web-bootstrap5">
+                        <i class="bi bi-github"></i>
+                        Github
+                    </a>
+                </div>
+                
+            </div>
+
+            <div class="form-floating mb-4">
+                <textarea class="form-control" id="sublink" placeholder="每行一条链接，或者使用“|”分隔"></textarea>
+                <label for="sublink">订阅链接：</label>
+                <div class="small ms-2 mt-1 text-muted">
+                    <i class="bi bi-info-circle"></i>
+                    每行一条链接，或者使用“|”分隔
+                </div>
+            </div>
+
+            <div class="input-group mb-4" data-bs-toggle="tooltip" title="需要生成的配置文件类型">
+                <span class="input-group-text">客户端：</span>
+                <select class="form-select" id="target" style="max-height: 100px;"></select>
+            </div>
+
+            <div class="input-group mb-4" data-bs-toggle="tooltip" title="后端按照此配置生成订阅">
+                <span class="input-group-text">远程配置：</span>
+                <select class="form-select" id="config"></select>
+            </div>
+
+            <div class="input-group mb-4" id="backendBlock">
+                <span class="input-group-text">后端地址：</span>
+                <select class="form-select scroll-behavior" id="backend" data-bs-toggle="tooltip" title="由哪一个后端进行订阅转换，本地转换需要自行运行后端"></select>
+                <button class="btn btn-outline-primary" id="showBackendModal" type="button"  data-bs-toggle="modal" data-bs-target="#backendModal" data-bs-toggle="tooltip" title="">自定义后端</button>
+            </div>
+
+            <div class="modal fade" id="backendModal" tabindex="-1" aria-labelledby="backendModal" aria-hidden="true">
+                <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                    <h1 class="modal-title fs-5">自定义后端</h1>
+                    <div class="small ms-2 mt-1 text-muted">
+                        <i class="bi bi-info-circle"></i>
+                        名称会在网页显示，后端地址作为实际使用地址
+                    </div>
+                    </div>
+                    <div class="modal-body">
+                        <div id="backendModalBody"></div>
+                        <button type="button" class="btn btn-primary" id="addBackend">
+                            <i class="bi bi-plus-lg"></i>
+                        </button>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" id="cancelCustom" data-bs-dismiss="modal">取消</button>
+                        <button type="button" class="btn btn-success" id="saveCustom" data-bs-dismiss="modal">保存</button>
+                    </div>
+                </div>
+                </div>
+            </div>
+
+            <div  class="accordion mb-4">
+                <div class="accordion-item">
+                    <h2 class="accordion-header" data-bs-toggle="tooltip" title="点击展开/收起更多设置">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#adv" aria-expanded="false" aria-controls="adv">
+                            高级设置
+                        </button>
+                    </h2>
+                    <div id="adv" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
+                        <div class="accordion-body">
+                            <div class="mx-md-5 my-3">
+                                <div class="input-group mb-2" data-bs-toggle="tooltip" title="保留名称匹配的节点，多个关键字用“()”包裹并用“|”分隔，支持正则表达式">
+                                    <span class="input-group-text">保留节点：</span>
+                                    <input type="text" class="form-control" id="include" placeholder="(日本|新加坡)">
+                                </div>
+
+                                <div class="input-group mb-2"  data-bs-toggle="tooltip" title="删除名称匹配的节点，多个关键字用“()”包裹并用“|”分隔，支持正则表达式">
+                                    <span class="input-group-text">排除节点：</span>
+                                    <input type="text" class="form-control" id="exclude" placeholder="(流量|官网)">
+                                </div>
+
+                                <div class="input-group mb-2" data-bs-toggle="tooltip" title="用于设置该订阅的组名，多用于 SSD/SSR">
+                                    <span class="input-group-text">订阅组名：</span>
+                                    <input type="text" class="form-control" id="group" placeholder="MySS">
+                                </div>
+
+                                <div class="input-group mb-2" data-bs-toggle="tooltip" title="用于设置 QuantumultX 的远程设备 ID, 以在某些版本上开启远程脚本">
+                                    <span class="input-group-text">设备ID：</span>
+                                    <input type="text" class="form-control" id="dev_id" placeholder="92DSAFA">
+                                </div>
+
+                                <div class="input-group mb-2" data-bs-toggle="tooltip" title="指定所生成订阅的文件名，可以在 Clash For Windows 等支持文件名的软件中显示出来">
+                                    <span class="input-group-text">文件名：</span>
+                                    <input type="text" class="form-control" id="filename" placeholder="MySS">
+                                </div>
+
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="strict">
+                                    <label class="form-check-label" for="strict">
+                                        Surge自动更新
+                                    </label>
+                                </div>
+
+                                <div class="input-group mb-2" data-bs-toggle="tooltip" title="用于设置托管配置更新间隔，确定配置将更新多长时间，单位为秒">
+                                    <span class="input-group-text">更新间隔：</span>
+                                    <input type="number" class="form-control" id="interval" min="0" value="0">
+                                </div>
+
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" id="new_name" checked>
+                                    <label class="form-check-label" for="new_name" data-bs-toggle="tooltip" title="启用 Clash 的新组名称 (proxies, proxy-groups, rules)，默认勾选">
+                                        Clash新字段
+                                    </label>
+                                </div>
+
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="checkbox" id="emoji" checked>
+                                    <label class="form-check-label" for="emoji">
+                                        允许节点名包含emoji
+                                    </label>
+                                </div>
+                                
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="checkbox" id="add_emoji" checked>
+                                    <label class="form-check-label" for="add_emoji">
+                                        在节点名前添加emoji
+                                    </label>
+                                </div>
+
+                                <div class="form-check form-check-inline mb-2">
+                                    <input class="form-check-input" type="checkbox" id="remove_emoji" checked>
+                                    <label class="form-check-label" for="remove_emoji">
+                                        删除节点名原有的emoji
+                                    </label>
+                                </div>
+
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" id="append_type">
+                                    <label class="form-check-label" for="append_type" data-bs-toggle="tooltip" title="在节点名称前插入节点类型，如 [SS],[SSR]等">
+                                        在节点名前添加协议类型
+                                    </label>
+                                </div>
+
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" id="tfo">
+                                    <label class="form-check-label" for="tfo" data-bs-toggle="tooltip" title="在节点配置中添加TCP快速打开参数">
+                                        启用TCP快速打开
+                                    </label>
+                                </div>
+
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" id="udp">
+                                    <label class="form-check-label" for="udp" data-bs-toggle="tooltip" title="在节点配置中添加启用UDP参数">
+                                        启用UDP
+                                    </label>
+                                </div>
+
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" id="tls13">
+                                    <label class="form-check-label" for="tls13" data-bs-toggle="tooltip" title="在节点配置中添加支持TLS1.3参数">
+                                        启用TLS1.3支持
+                                    </label>
+                                </div>
+
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" id="scv">
+                                    <label class="form-check-label" for="scv" data-bs-toggle="tooltip" title="关闭涉及TLS证书的节点证书检查(不安全)">
+                                        关闭TLS证书检查
+                                    </label>
+                                </div>
+
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" id="sort">
+                                    <label class="form-check-label" for="sort" data-bs-toggle="tooltip" title="按照节点名称重新排序">
+                                        按名称排序
+                                    </label>
+                                </div>
+
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" id="script">
+                                    <label class="form-check-label" for="script" data-bs-toggle="tooltip" title="生成Clash Script，默认为 false">
+                                        生成Clash脚本
+                                    </label>
+                                </div>
+                                
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="checkbox" id="insert" checked>
+                                    <label class="form-check-label" for="insert" data-bs-toggle="tooltip" title="将后端配置中的节点插入，默认勾选">
+                                        允许后端插入节点
+                                    </label>
+                                </div>
+
+                                <div class="form-check form-check-inline mb-2">
+                                    <input class="form-check-input" type="checkbox" id="prepend" checked>
+                                    <label class="form-check-label" for="prepend" data-bs-toggle="tooltip" title="将节点插入到列表的开头，默认勾选">
+                                        插入到节点前
+                                    </label>
+                                </div>
+                                
+
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" id="fdn" checked>
+                                    <label class="form-check-label" for="fdn" data-bs-toggle="tooltip" title="过滤客户端不支持的节点，默认勾选">
+                                        过滤客户端不支持的节点
+                                    </label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" id="expand" checked>
+                                    <label class="form-check-label" for="expand" data-bs-toggle="tooltip" title="在处理或转换 Surge, QuantumultX, Clash 的规则列表时是否将规则全文置入订阅中，默认勾选">
+                                        将规则全文写入订阅
+                                    </label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" id="append_info">
+                                    <label class="form-check-label" for="append_info">
+                                        增加显示到期时间与流量的节点
+                                    </label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" id="classic">
+                                    <label class="form-check-label" for="classic">
+                                        生成Clash经典规则提供者(规则集)
+                                    </label>
+                                </div>
+
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" id="list">
+                                    <label class="form-check-label" for="list" data-bs-toggle="tooltip" title="输出 Surge Node List / Clash Proxy Provider / Quantumult (X) 的节点订阅 / 解码后的 SIP002">
+                                        输出为Node List
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="input-group mb-4 btn-group-lg justify-content-center">
+                <button class="btn btn-success " id="makeSubBtn" type="button">生成订阅</button>
+                <button class="btn btn-primary" id="makeShortBtn" type="button">缩短链接</button>
+            </div>
+
+            <div class="input-group mb-4">
+                <span class="input-group-text">订阅链接：</span>
+                <input type="text" class="form-control text-muted" id="longSub" disabled>
+                <button type="button" class="btn btn-primary d-none d-sm-block copyLongBtn" id="copyLongSub">
+                    <i class="bi bi-copy"></i>
+                    复制
+                </button>
+                <button class="btn btn-success dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" >
+                    导入
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li>
+                        <a class="dropdown-item copyLongBtn d-block d-sm-none" id="">
+                            <i class="bi bi-copy"></i>
+                            复制订阅
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item" href="#" id="longInstall2Clash">
+                            <i class="bi bi-arrow-right-square"></i>
+                            导入到Clash
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item" href="#" id="longInstall2Surge">
+                            <i class="bi bi-arrow-right-square"></i>
+                            导入到Surge
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item" href="#" id="longInstall2Shadowrocket">
+                            <i class="bi bi-arrow-right-square"></i>
+                            导入到Shadowrocket
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item" href="#" id="longInstall2Stash">
+                            <i class="bi bi-arrow-right-square"></i>
+                            导入到Stash
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item" href="#" id="longInstall2Quantumultx">
+                            <i class="bi bi-arrow-right-square"></i>
+                            导入到Quantumult X
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            <div class="input-group mb-4">
+                <span class="input-group-text">缩短链接：</span>
+                <input type="text" class="form-control text-muted" id="shortSub" disabled>
+                <button type="button" class="btn btn-primary d-none d-sm-block" id="copyShortSub">
+                    <i class="bi bi-copy"></i>
+                    复制
+                </button>
+                <button class="btn btn-success dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" >
+                    导入
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li>
+                        <a class="dropdown-item d-block d-sm-none" href="#" id="copyShortSub">
+                            <i class="bi bi-copy"></i>
+                            复制短链接
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item" href="#" id="shortInstall2Clash">
+                            <i class="bi bi-arrow-right-square"></i>
+                            导入到Clash
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item" href="#" id="shortInstall2Surge">
+                            <i class="bi bi-arrow-right-square"></i>
+                            导入到Surge
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item" href="#" id="shortInstall2Shadowrocket">
+                            <i class="bi bi-arrow-right-square"></i>
+                            导入到Shadowrocket
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item" href="#" id="shortInstall2Stash">
+                            <i class="bi bi-arrow-right-square"></i>
+                            导入到Stash
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item" href="#" id="shortInstall2Quantumultx">
+                            <i class="bi bi-arrow-right-square"></i>
+                            导入到Quantumult X
+                        </a>
+                    </li>
+                </ul>
+              
+            </div>
+            
+        </div>
+    </div>
+
+    <script>
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+
+        $(function(){
+            $("#longSub").val("");
+            $("#shortSub").val("");
+            //清空链接栏
+            
+            changeTheme(localStorage.getItem("theme"));
+            //切换主题
+            $("#themeAuto").click(function() {
+                changeTheme("auto");
+            });
+            $("#themeLight").click(function() {
+                changeTheme("light");
+            });
+            $("#themeDark").click(function() {
+                changeTheme("dark");
+            });
+
+            showClientList();
+            //插入客户端
+
+            showConfigList();
+            //插入远程配置
+
+            showBackendList();
+            //插入后端
+
+            showCustomBackend();
+            //插入自定义后端
+
+            $("#showBackendModal").click(function() {
+                //点击显示自定义后端弹窗
+                showCustomBackend();
+            })
+
+            $("#saveCustom").click(function() {
+                //保存自定义后端并刷新
+                saveCustomBackend();
+                showBackendList();
+            })
+
+            $("#addBackend").click(function() {
+                //添加后端
+                addBlankBackend();
+            });
+            delCustomBackend();
+
+            $("#makeSubBtn").click(function(){
+
+                let newsub = makeSub();
+                $("#longSub").val(newsub);
+                $("#shortSub").val("");
+                //生成订阅链接同时清除短链接
+
+                copyLink(newsub);//立即复制
+                printAlert("success","已复制订阅到剪切板");
+            });
+
+            $("#makeShortBtn").click(function() {
+                //生成短链接
+                if($("#longSub").val()==""){
+                    printAlert("danger","请先生成订阅链接");
+                }
+                // 调用getShortURL函数，并在回调函数中处理返回值
+                getShortURL($("#longSub").val(), function(shortUrl) {
+                    url = shortUrl;
+                    if(url==""){
+                        printAlert("danger","短链接生成失败");
+                        return;
+                    }
+                    printAlert("success","短链接已生成");
+                    $("#shortSub").val(url);
+                    $("#copyShortSub").attr("data-clipboard-text", url);
+                });
+            })
+
+            //订阅链接导入（长链接）
+            $("#longInstall2Clash").click(function() {
+                install2("clash",$("#longSub").val());
+            });
+            $("#longInstall2Surge").click(function() {
+                install2("surge",$("#longSub").val());
+            });
+            $("#longInstall2Shadowrocket").click(function() {
+                install2("shadowrocket",$("#longSub").val());
+            });
+            $("#longInstall2Stash").click(function() {
+                install2("stash",$("#longSub").val());
+            });
+            $("#longInstall2Quantumultx").click(function() {
+                install2("quantumultx",$("#longSub").val());
+            });
+
+            //短链接导入
+            $("#shortInstall2Clash").click(function() {
+                install2("clash",$("#longSub").val());
+            });
+            $("#shortInstall2Surge").click(function() {
+                install2("surge",$("#longSub").val());
+            });
+            $("#shortInstall2Shadowrocket").click(function() {
+                install2("shadowrocket",$("#longSub").val());
+            });
+            $("#shortInstall2Stash").click(function() {
+                install2("stash",$("#longSub").val());
+            });
+            $("#shortInstall2Quantumultx").click(function() {
+                install2("quantumultx",$("#longSub").val());
+            });
+
+
+            $(".copyLongBtn").on("click", function() {
+                if($("#longSub").val()==""){
+                    printAlert("danger","请先生成订阅链接");
+                    return;
+                }
+                copyLink($("#longSub").val());
+                printAlert("info","链接已复制！");
+            });
+
+            $("#copyShortSub").click(function() {
+                if($("#shortSub").val()==""){
+                    printAlert("danger","请先生成短链接");
+                    return;
+                }
+                copyLink("#shortSub");
+                printAlert("info","短链接已复制！");
+            });
+        });
+    </script>
+</body>
+</html>
